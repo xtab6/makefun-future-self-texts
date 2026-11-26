@@ -23,10 +23,14 @@ def main():
         if os.path.isfile(path) or os.path.islink(path):
             os.unlink(path)
     line = LINE.strip()
-    assert "\n" not in line, "entry must be a single line"
+    assert "\n" not in line and "\r" not in line, "entry must be a single line"
     assert 1 <= len(line) <= 140, "entry must be 1-140 chars, got %d" % len(line)
+    assert line == LINE.strip(), "entry must not gain or lose whitespace"
     with open(os.path.join(out_dir, "entry.txt"), "w", encoding="utf-8") as f:
         f.write(line + "\n")
+    # Verify the write round-trips: the file must hold exactly the line + newline.
+    with open(os.path.join(out_dir, "entry.txt"), "r", encoding="utf-8") as f:
+        assert f.read() == line + "\n", "entry.txt round-trip mismatch"
 
 
 if __name__ == "__main__":
